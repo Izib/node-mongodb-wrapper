@@ -138,7 +138,7 @@ module.exports = db = {
      * @param callback Your callback method(error, item)
      */
     insert: function(database, collectionname, options, callback) {
-        trace("fuction: insert);
+        trace("fuction: insert");
         trace(collectionname);
         trace(options);		
         getConnection(database, collectionname, "insert", function(error, collection, cnn) {
