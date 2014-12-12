@@ -30,7 +30,8 @@ function trace(message) {
         return;
     }
 
-    console.log("mongowrapper: " + message);
+    console.log(Date() + "mongowrapper: ");
+    console.log(message);
 }
 
 /**
@@ -63,7 +64,8 @@ function killConnection(cnn, error) {
  * @param callback The callback function
  */
 function getConnection(databasename, collectionname, operation, callback) {
-
+    trace("fuction: getConnection");
+    trace(databasename + ":" + collectionname);
     var database = databases[databasename];
     var options = {
         slave_ok: true
@@ -121,6 +123,8 @@ module.exports = db = {
      * @param dblist Your databases:  { db1: { address: "", port: , name: "db1" }, ... }
      */
     setDatabases:function(dblist) {
+        trace("function: setDatabases);
+        trace(dblist);
         databases = dblist;
         configureDatabases();
     },
@@ -134,7 +138,9 @@ module.exports = db = {
      * @param callback Your callback method(error, item)
      */
     insert: function(database, collectionname, options, callback) {
-
+        trace("fuction: insert);
+        trace(collectionname);
+        trace(options);		
         getConnection(database, collectionname, "insert", function(error, collection, cnn) {
 
             collection.insert(options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }}, function(error, items) {
@@ -169,7 +175,9 @@ module.exports = db = {
      * @param callback Your callback method(error, success)
      */
     update: function(database, collectionname, options, callback) {
-
+        trace("fuction: update");
+        trace(collectionname);
+        trace(options);
         getConnection(database, collectionname, "update", function(error, collection, cnn) {
 
             collection.update(options.filter, options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }, upsert: options.upsert || true}, function(error) {
@@ -235,7 +243,9 @@ module.exports = db = {
      * @param callback Your callback method(error, item)
      */
     getOrInsert: function(database, collectionname, options, callback) {
-
+        trace("fuction: getOrInsert");
+        trace(collectionname);
+        trace(options);
         getConnection(database, collectionname, "getOrInsert", function(error, collection, cnn) {
 
             collection.find(options.filter).limit(1).toArray(function (error, items) {
