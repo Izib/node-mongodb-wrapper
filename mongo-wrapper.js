@@ -69,7 +69,7 @@ function getConnection(databasename, collectionname, operation, callback) {
         slave_ok: true
     };
 
-    var db = new mongodb.Db(database.name, new mongodb.Server(database.address, database.port, options));
+    var db = new mongodb.Db(database.name, new mongodb.Server(database.address, database.port, options),{safe: true});
     db.open(function (error, connection) {
 
         var cnn = {
@@ -130,14 +130,14 @@ module.exports = db = {
      *
      * @param database Database config name
      * @param collectionname The collection name
-     * @param options { doc: {}, safe: false }
+     * @param options { doc: {}, safe: false }. In 2.6.6, "safe" is replaced by { writeConcern: { w: "majority", wtimeout: 5000 }}
      * @param callback Your callback method(error, item)
      */
     insert: function(database, collectionname, options, callback) {
 
         getConnection(database, collectionname, "insert", function(error, collection, cnn) {
 
-            collection.insert(options.doc, {safe: options.safe}, function(error, items) {
+            collection.insert(options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }}, function(error, items) {
 
                 killConnection(cnn, error);
 
@@ -165,14 +165,14 @@ module.exports = db = {
      *
      * @param database Database config name
      * @param collectionname The collection name
-     * @param options { filter: {}, doc: {}, safe: false, upsert: true }
+     * @param options { filter: {}, doc: {}, safe: false, upsert: true } In 2.6.6, "safe" is replaced by { writeConcern: { w: "majority", wtimeout: 5000 }}
      * @param callback Your callback method(error, success)
      */
     update: function(database, collectionname, options, callback) {
 
         getConnection(database, collectionname, "update", function(error, collection, cnn) {
 
-            collection.update(options.filter, options.doc, {safe: options.safe || false, upsert: options.upsert || true}, function(error) {
+            collection.update(options.filter, options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }, upsert: options.upsert || true}, function(error) {
 
                 killConnection(cnn, error);
 
@@ -231,7 +231,7 @@ module.exports = db = {
      *
      * @param database Database config name
      * @param collectionname The collection name
-     * @param options { filter: {}, doc: {}, safe: true or false }
+     * @param options { filter: {}, doc: {}, safe: true or false }, In 2.6.6, "safe" is replaced by { writeConcern: { w: "majority", wtimeout: 5000 }}
      * @param callback Your callback method(error, item)
      */
     getOrInsert: function(database, collectionname, options, callback) {
@@ -260,7 +260,7 @@ module.exports = db = {
                 }
 
                 // insert it
-                collection.insert(options.doc, {safe: options.safe || false}, function(error, item) {
+                collection.insert(options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }}, function(error, item) {
 
                     killConnection(cnn, error);
 
@@ -534,7 +534,7 @@ module.exports = db = {
      * @param database Database config name
      * @param collection1name The source collection name
      * @param collection2name The destination collection name
-     * @param options { doc: {... }, overwrite: true, safe: false, }
+     * @param options { doc: {... }, overwrite: true, safe: false, }, In 2.6.6, "safe" is replaced by { writeConcern: { w: "majority", wtimeout: 5000 }}
      * @param callback Your callback method(error, success)
      */
     move: function(database, collection1name, collection2name, options, callback) {
@@ -613,7 +613,7 @@ module.exports = db = {
 						return;
 					}
 						
-	                collection2.update(options.doc, options.doc, {safe: options.safe || false, upsert: options.upsert || options.overwrite}, function(error) {
+	                collection2.update(options.doc, options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }, upsert: options.upsert || options.overwrite}, function(error) {
 
 	                    if(error) {
 
