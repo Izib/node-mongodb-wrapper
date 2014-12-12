@@ -1,8 +1,14 @@
+var ini = require('node-ini'); 
+var log4js = require('log4js');
+
+// config ini
+ini.encoding = 'utf-8';
+var cfg = ini.parseSync('./config.ini');
+
 var mongodb = require("mongodb"),
     localcache = {},
     connections = {},
-    allconnections = [],
-    debug = process.env.debug || false;
+    allconnections = [];
 
 /**
  * Database configurations, this way your api calls are more simple
@@ -21,28 +27,17 @@ var databases = {
     }
 };
 
+
 /**
  * Helper functions
  */
-function traceVerb(timstamp, name, message) {
-
-    if(!debug) {
-        return;
-    }
-    if(timestamp) {
-        console.log(Date() + "mongowrapper: ");
-    }
-    console.log(name + "->");
-    console.log(message);
-}
+var logger = log4js.getLogger();
+var logLevel = cfg.log.level || 'ERROR';
+logger.setLevel(logLevel);
 
 function trace(message) {
 
-    if(!debug) {
-        return;
-    }
-	
-    console.log(message);
+    logger.error(message);
 }
 
 /**
@@ -75,8 +70,7 @@ function killConnection(cnn, error) {
  * @param callback The callback function
  */
 function getConnection(databasename, collectionname, operation, callback) {
-    traceVerb( true, "fuction", "getConnection");
-    traceVerb( false, "db name:col name", databasename + ":" + collectionname);
+    logger.info( "info", "Method<getConnection>:database,collectionname,operation->", databasename,collectionname,operation);
     var database = databases[databasename];
     var options = {
         slave_ok: true
@@ -134,8 +128,6 @@ module.exports = db = {
      * @param dblist Your databases:  { db1: { address: "", port: , name: "db1" }, ... }
      */
     setDatabases:function(dblist) {
-        traceVerb(true,"function", "setDatabases");
-        traceVerb(false, "dblist", dblist);
         databases = dblist;
         configureDatabases();
     },
@@ -149,9 +141,8 @@ module.exports = db = {
      * @param callback Your callback method(error, item)
      */
     insert: function(database, collectionname, options, callback) {
-        traceVerb( true, "fuction", "insert");
-        traceVerb( false, "col name", "collectionname);
-        traceVerb( false, "options", options);		
+        logger.info( "info", "Method<insert>:database,collectionname,options->",database,collectionname, options);
+        		
         getConnection(database, collectionname, "insert", function(error, collection, cnn) {
 
             collection.insert(options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }}, function(error, items) {
@@ -186,11 +177,10 @@ module.exports = db = {
      * @param callback Your callback method(error, success)
      */
     update: function(database, collectionname, options, callback) {
-        traceVerb( true, "fuction", "update");
-        traceVerb( false, "col name", collectionname);
-        traceVerb( false, "options", options);
+        logger.info( "info", "Method<update>:database,collectionname,options->",database,collectionname, options);
+		
         getConnection(database, collectionname, "update", function(error, collection, cnn) {
-
+            
             collection.update(options.filter, options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }, upsert: options.upsert || true}, function(error) {
 
                 killConnection(cnn, error);
@@ -215,7 +205,8 @@ module.exports = db = {
      * @param callback Your callback method(error, items)
      */
     get: function(database, collectionname, options, callback) {
-
+        logger.info( "info", "Method<get>:database,collectionname,options->",database,collectionname, options);
+		
         if(options.cache) {
             var cached = cache.get(database, collectionname, "get", options);
 
@@ -254,9 +245,8 @@ module.exports = db = {
      * @param callback Your callback method(error, item)
      */
     getOrInsert: function(database, collectionname, options, callback) {
-        trace("fuction: getOrInsert");
-        trace(collectionname);
-        trace(options);
+        logger.info( "info", "Method<getOrInsert>:database,collectionname,options->",database,collectionname, options);   
+		
         getConnection(database, collectionname, "getOrInsert", function(error, collection, cnn) {
 
             collection.find(options.filter).limit(1).toArray(function (error, items) {
@@ -559,7 +549,8 @@ module.exports = db = {
      * @param callback Your callback method(error, success)
      */
     move: function(database, collection1name, collection2name, options, callback) {
-
+        logger.info( "info", "Method<move>:database,collection1name,collection2name,options->",database,collection1name, collection2name, options);   
+        
         getConnection(database, collection1name, "move", function(error, collection1, cnn1) {
 
             if(error) {
@@ -681,7 +672,8 @@ module.exports = db = {
      * @param callback Your callback method(error, success)
      */
     remove: function(database, collectionname, options, callback) {
-
+        logger.info( "info", "Method<remove>:database,collectionname,operation->", database,collectionname,options);
+		
         getConnection(database, collectionname, "remove", function(error, collection, cnn) {
 
             if(error) {
