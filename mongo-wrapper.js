@@ -123,7 +123,7 @@ module.exports = db = {
      * @param dblist Your databases:  { db1: { address: "", port: , name: "db1" }, ... }
      */
     setDatabases:function(dblist) {
-        trace("function: setDatabases);
+        trace("function: setDatabases");
         trace(dblist);
         databases = dblist;
         configureDatabases();
