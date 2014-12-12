@@ -24,13 +24,24 @@ var databases = {
 /**
  * Helper functions
  */
+function traceVerb(timstamp, name, message) {
+
+    if(!debug) {
+        return;
+    }
+    if(timestamp) {
+        console.log(Date() + "mongowrapper: ");
+    }
+    console.log(name + "->");
+    console.log(message);
+}
+
 function trace(message) {
 
     if(!debug) {
         return;
     }
-
-    console.log(Date() + "mongowrapper: ");
+	
     console.log(message);
 }
 
@@ -64,8 +75,8 @@ function killConnection(cnn, error) {
  * @param callback The callback function
  */
 function getConnection(databasename, collectionname, operation, callback) {
-    trace("fuction: getConnection");
-    trace(databasename + ":" + collectionname);
+    traceVerb( true, "fuction", "getConnection");
+    traceVerb( false, "db name:col name", databasename + ":" + collectionname);
     var database = databases[databasename];
     var options = {
         slave_ok: true
@@ -123,8 +134,8 @@ module.exports = db = {
      * @param dblist Your databases:  { db1: { address: "", port: , name: "db1" }, ... }
      */
     setDatabases:function(dblist) {
-        trace("function: setDatabases");
-        trace(dblist);
+        traceVerb(true,"function", "setDatabases");
+        traceVerb(false, "dblist", dblist);
         databases = dblist;
         configureDatabases();
     },
@@ -138,9 +149,9 @@ module.exports = db = {
      * @param callback Your callback method(error, item)
      */
     insert: function(database, collectionname, options, callback) {
-        trace("fuction: insert");
-        trace(collectionname);
-        trace(options);		
+        traceVerb( true, "fuction", "insert");
+        traceVerb( false, "col name", "collectionname);
+        traceVerb( false, "options", options);		
         getConnection(database, collectionname, "insert", function(error, collection, cnn) {
 
             collection.insert(options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }}, function(error, items) {
@@ -175,9 +186,9 @@ module.exports = db = {
      * @param callback Your callback method(error, success)
      */
     update: function(database, collectionname, options, callback) {
-        trace("fuction: update");
-        trace(collectionname);
-        trace(options);
+        traceVerb( true, "fuction", "update");
+        traceVerb( false, "col name", collectionname);
+        traceVerb( false, "options", options);
         getConnection(database, collectionname, "update", function(error, collection, cnn) {
 
             collection.update(options.filter, options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }, upsert: options.upsert || true}, function(error) {
