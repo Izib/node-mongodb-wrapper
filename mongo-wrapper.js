@@ -3,7 +3,7 @@ var log4js = require('log4js');
 
 // config ini
 ini.encoding = 'utf-8';
-var cfg = ini.parseSync('./config.ini');
+var cfg = ini.parseSync('./cluster-config.ini');
 
 var mongodb = require("mongodb"),
     localcache = {},
