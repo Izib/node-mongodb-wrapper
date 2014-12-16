@@ -687,7 +687,7 @@ module.exports = db = {
                 return;
             }
 
-            collection.remove(options.filter, function(error) {
+            collection.remove(options.filter, function(error, result) {
 
                 killConnection(cnn, error);
 
@@ -696,7 +696,7 @@ module.exports = db = {
                 }
 
                 if(callback) {
-                    callback(error, error == null);
+                    callback(error, result);
                 }
             });
         });
