@@ -181,12 +181,12 @@ module.exports = db = {
 		
         getConnection(database, collectionname, "update", function(error, collection, cnn) {
             
-            collection.update(options.filter, options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }, upsert: options.upsert || true}, function(error) {
+            collection.update(options.filter, options.doc, {writeConcern: options.safe || { w: "majority", wtimeout: 5000 }, upsert: options.upsert || false}, function(error,records,status) {
 
                 killConnection(cnn, error);
 
                 if(callback) {
-                    callback(error, error == null);
+                    callback(error, status);
                 }
 
                 if(error) {
