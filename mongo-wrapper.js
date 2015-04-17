@@ -237,6 +237,35 @@ module.exports = db = {
     },
 
     /**
+     * Distinct one or more items
+     *
+     * @param database Database config name
+     * @param collectionname The collection name
+     * @param options "string"
+     * @param callback Your callback method(error, items)
+     */
+    distinct: function(database, collectionname, options, query, callback) {
+        logger.info( "info", "Method<distinct>:database,collectionname,options->",database,collectionname, options);	 
+
+        getConnection(database, collectionname, "distinct", function(error, collection, cnn) {
+        
+            collection.distinct( options, query, function (error, items) {
+
+                killConnection(cnn, error);
+
+                if(error) {
+                    trace("distinct error: " + error);
+                } 
+
+                if(callback) {
+                    callback(error, items || []);
+                }
+            });
+
+        });
+    },
+    
+    /**
      * Selects a single item or inserts it
      *
      * @param database Database config name
@@ -786,6 +815,9 @@ function configureDatabase(databasename) {
         db[databasename][collectionname] = {
 			get: function(options, callback) { 
 				db.get(databasename, collectionname, options, callback); 
+			},
+            distinct: function(options, callback) { 
+                db.distinct(databasename, collectionname, options, callback); 
 			},
 			getOrInsert: function(options, callback) { 
 				db.getOrInsert(databasename, collectionname, options, callback); 
